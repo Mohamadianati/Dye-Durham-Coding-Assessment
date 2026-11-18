@@ -136,6 +136,25 @@ public sealed class NameSortingTests
         Assert.Empty(stdout.ToString());
     }
 
+    [Fact]
+    public void Run_OneThousandNamesWritesEveryNameInOrderToBothOutputs()
+    {
+        using var files = new TemporaryDirectory();
+        string[] expected = Enumerable.Range(0, 1_000)
+            .Select(index => $"Given{index % 50:D2} Family{index / 50:D2}")
+            .ToArray();
+        File.WriteAllLines(files.PathFor("names.txt"), expected.Reverse());
+        using var stdout = new StringWriter();
+        using var stderr = new StringWriter();
+
+        int exitCode = Program.Run(["names.txt"], files.DirectoryPath, stdout, stderr);
+
+        Assert.Equal(0, exitCode);
+        Assert.Empty(stderr.ToString());
+        Assert.Equal(string.Join(Environment.NewLine, expected) + Environment.NewLine, stdout.ToString());
+        Assert.Equal(expected, File.ReadAllLines(files.PathFor("sorted-names-list.txt")));
+    }
+
     private sealed class InMemoryRepository(IReadOnlyList<Person> input) : IRepository<Person>
     {
         public IReadOnlyList<Person> Written { get; private set; } = [];
