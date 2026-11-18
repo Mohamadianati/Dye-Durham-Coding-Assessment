@@ -20,11 +20,22 @@ public sealed class TextFileRepository<T> : IRepository<T>
     public IReadOnlyList<T> Read(string path)
     {
         var items = new List<T>();
+        int lineNumber = 0;
         foreach (string line in File.ReadLines(path))
         {
-            if (!string.IsNullOrWhiteSpace(line))
+            lineNumber++;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            try
             {
                 items.Add(_parse(line));
+            }
+            catch (FormatException exception)
+            {
+                throw new InvalidDataException($"Invalid entry on line {lineNumber}: {exception.Message}", exception);
             }
         }
 
