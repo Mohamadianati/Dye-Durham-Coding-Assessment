@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Generated name sorter output
 /sorted-names-list.txt
+/unsorted-names-list.txt
